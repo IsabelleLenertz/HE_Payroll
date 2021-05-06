@@ -18,6 +18,14 @@ ytd_ss_employee = "ytd_ss_employee"
 ytd_medicare_employee = "ytd_medicare_employee"
 gross = "gross"
 net = "net"
+cal = "california_taxes"
+disability = "disability"
+unemployment = "unemployment"
+training = "training"
+ytd_unemployment = "ytd_unemployment"
+ytd_training = "ytd_training"
+ytd_disability = "ytd_disability"
+
 
 #classmethod date.fromisoformat(date_string)
 #>>> from datetime import date
@@ -77,17 +85,24 @@ def create_json_stub(start, middle_sunday, middle_monday, end):
         medicare_employee : taxrates[fed][medicare_employer][0]*wages[gross]/100,
         futa : taxrates[fed][futa][0]*wages[gross]/100,
     }
-    for tup in federal_taxes:
-        if taxrates[fed][tup][2]:
-            wages[net] = wages[net] - federal_taxes[tup]
+    for tax in federal_taxes:
+        if taxrates[fed][tax][2]:
+            wages[net] = wages[net] - federal_taxes[tax]
             
     # Apply California taxes
-    
     california_taxes = {
-        
+        unemployment: taxrates[cal][unemployment][0]*wages[gross]/100,
+        training:  taxrates[cal][training][0]*wages[gross]/100,
+        disability:  taxrates[cal][disability][0]*wages[gross]/100
     }
+    
+    for tax in california_taxes:
+        if taxrates[cal][tax][2]:
+            wages[net] = wages[net] - california_taxes[tax]
+
     print(wages)
     print(federal_taxes)
+    print(california_taxes)
 
 
 create_json_stub("04-26-2021", "04-28-2021", "04-29-2021", "04-30-2021")
