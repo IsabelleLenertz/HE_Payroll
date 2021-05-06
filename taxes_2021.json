@@ -1,0 +1,20 @@
+{
+    "object": "tax rates",
+    "year": 2021,
+    "california_taxes": {
+        "disability": [0.0, 128298, true],
+        "unemployment": [3.5, 7000, false],
+        "training": [0.1, 7000, false],
+        "array_content": ["rate", "limit", "withholding"]
+        
+    },
+    "federal_taxes": {
+        "social_security_employer": [6.2, 142800, false],
+        "medicare_employer": [1.45, 0, false],
+        "social_security_employee":[6.2, 142800, true],
+        "medicare_employee": [1.45, 0 , true],
+        "futa": [6.0, 7000, false],
+        "info": "see FUTA tax credit up to 5.4%",
+        "array_content": ["rate", "limit", "withholding"]
+    }
+}

@@ -1,0 +1,49 @@
+{
+    "object": "paystub",
+    "employee_first": "first name",
+    "employee_last": "last name",
+    "period": ["04-26-2021", "05-09-2021"],
+    "rate": 0.0,
+    "check_num": 0,
+    "hours": {
+        "worked_h_m": [40, 0],
+        "sick_h_m": [0, 0],
+        "pto_h_m": [0, 0],
+        "over_h_m": [0, 0]
+    },
+    "federal_taxes": {
+        "social_security_employer": 0,
+        "medicare_employer": 0,
+        "futa": 0,
+        "social_security_employee": 0,
+        "medicare_employee": 0,
+        "ytd_ss_employer": 0,
+        "ytd_medicare_employer": 0,
+        "ytd_futa": 0,
+        "ytd_ss_employee": 0,
+        "ytd_medicare_employee": 0
+    },
+    "california_taxes":{
+        "unemployment": 0,
+        "training": 0,
+        "disability": 0,
+        "ytd_unemployment": 0,
+        "ytd_training": 0,
+        "ytd_disability": 0
+    },
+    "taxes_total":{
+        "wage-applicable": 0,
+        "non-wag-applicable": 0,
+        "total": 0
+    },
+    "wages":{
+        "gross": 0,
+        "net": 0,
+        "ytd_gross": 0,
+        "ytd_net":0
+    },
+    "employer_cost": {
+        "period": 0,
+        "ytd": 0
+    }
+}
