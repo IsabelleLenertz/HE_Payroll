@@ -36,40 +36,37 @@ ytd_disability = "ytd_disability"
 
 
 # get the hours worked for a week from start date (str: MM-DD-YYY)
-def calculate_time_worked(start, end, timesheet):
+def calculate_time_worked(start, num_weeks, timesheet):
+    reg_hours, overtime_hours, pto_hours, sick_hours = 0, 0, 0, 0
     df = pd.read_csv(timesheet, header=0, parse_dates= False, infer_datetime_format = True)
-    period = df.query('date >= @start and date <= @end')
     FMT = '%H:%M'
-    #get hours worked
-    daily_hours = period.apply(lambda r : datetime.strptime(r[2], FMT)  - datetime.strptime(r[1], FMT), axis=1)
-    worked = daily_hours.aggregate(np.sum, 0)
-    print(worked)
-    #TODO get pto hours used
-    #TODO get sick day hours used
-    return (worked.total_seconds()/3600, 0, 0)
+    for i in range(num_weeks):
+        later = (date.fromisoformat(start) + timedelta(weeks=1)).isoformat()
+        period = df.query('date >= @start and date <= @later')
+        #get hours worked
+        daily_hours = period.apply(lambda r : datetime.strptime(r[2], FMT)  - datetime.strptime(r[1], FMT), axis=1)
+        daily_other = period.sum(numeric_only = True)
+        pto_hours = pto_hours + daily_other[1]
+        sick_hours = sick_hours + daily_other[0]
+        worked = daily_hours.aggregate(np.sum, 0)
+        worked = worked.total_seconds()/3600
+        if worked > 40:
+            reg_hours = reg_hours + 40
+            overtime_hours = overtime_hours + worked - 40
+        else:
+            reg_hours = reg_hours + worked
+        start = (date.fromisoformat(later) + timedelta(days=1)).isoformat()
+    return (reg_hours, overtime_hours, pto_hours, sick_hours)
 
 
-def create_json_stub(start, middle_sunday, middle_monday, end):
+def create_json_stub(start, num_weeks, timesheet):
     # Get the hours per week (worked, over, pto, sick)
-    reg_hours, overtime_hours, pto, sick = 0, 0, 0, 0
-    hours, pto_temp, sick_temp = calculate_time_worked(start, middle_sunday , "timesheet_sample.csv")
-    if(hours > 40):
-        reg_hours += 40
-        overtime_hours += (hours - 40)
-    else:
-        reg_hours += hours
-    hours, pto_temp, sick_temp = calculate_time_worked(middle_monday, end , "timesheet_sample.csv")
-    if(hours > 40):
-        reg_hours += 40
-        overtime_hours += (hours - 40)
-    else:
-        reg_hours += hours
-
+    reg_hours, overtime_hours, pto, sick = calculate_time_worked(start, num_weeks , timesheet)
 
     #Load tax info
     with open('taxes_2021.json') as f:
         taxrates = json.load(f)
-    with open('david.json') as f:
+    with open('_private/david.json') as f:
         employee = json.load(f)
         
     # Apply pay-rate and over-time rate
@@ -100,12 +97,14 @@ def create_json_stub(start, middle_sunday, middle_monday, end):
         if taxrates[cal][tax][2]:
             wages[net] = wages[net] - california_taxes[tax]
 
-    print(wages)
-    print(federal_taxes)
-    print(california_taxes)
+    print("Employee: ", employee)
+    print("Hours: ", hours_dic)
+    print("Wages: ", wages)
+    print("Federal taxes: ", federal_taxes)
+    print("California taxes: ", california_taxes)
 
 
-create_json_stub("04-26-2021", "04-28-2021", "04-29-2021", "04-30-2021")
+create_json_stub("2021-04-26",2, "_private/david_timesheet_2021.csv")
         
     
     

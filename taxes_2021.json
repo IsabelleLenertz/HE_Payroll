@@ -2,7 +2,7 @@
     "object": "tax rates",
     "year": 2021,
     "california_taxes": {
-        "disability": [0.0, 128298, true],
+        "disability": [1.2, 128298, true],
         "unemployment": [3.5, 7000, false],
         "training": [0.1, 7000, false],
         "array_content": ["rate", "limit", "withholding"]
