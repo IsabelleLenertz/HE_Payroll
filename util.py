@@ -5,7 +5,21 @@ import numpy as np
 from datetime import datetime, date, time, timedelta
 import json
 from constants import *
+from pymongo import MongoClient, mongo_client
+from pymongo.errors import _format_detailed_error
 
+
+
+mongo_client = "mongodb://127.0.0.1:27017"
+
+#importing jason basic data
+""" with open("_private/steph.json") as file:
+        file_data = json.load(file)
+        print(file_data)
+client = MongoClient('mongodb://127.0.0.1:27017')
+db = client["PayRoll"]
+Collection = db["emploees"]
+Collection.insert_one(file_data) """
 #classmethod date.fromisoformat(date_string)
 #>>> from datetime import date
 #>>> date.fromisoformat('2019-12-04')

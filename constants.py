@@ -22,3 +22,5 @@ employee_collection="employees"
 payroll_db = "PayRoll"
 fn = "name_first"
 ln = "name_last"
+hours_per_sick = 30
+year = "year"
