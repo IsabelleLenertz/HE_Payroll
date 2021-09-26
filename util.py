@@ -4,28 +4,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, date, time, timedelta
 import json
-
-fed = "federal_taxes"
-ss_employer = "social_security_employer"
-medicare_employer = "medicare_employer"
-futa ="futa"
-ss_employee = "social_security_employee"
-medicare_employee = "medicare_employee"
-ytd_ss_employer = "ytd_ss_employer"
-ytd_medicare_employer = "ytd_medicare_employer"
-ytd_futa = "ytd_futa"
-ytd_ss_employee = "ytd_ss_employee"
-ytd_medicare_employee = "ytd_medicare_employee"
-gross = "gross"
-net = "net"
-cal = "california_taxes"
-disability = "disability"
-unemployment = "unemployment"
-training = "training"
-ytd_unemployment = "ytd_unemployment"
-ytd_training = "ytd_training"
-ytd_disability = "ytd_disability"
-
+from constants import *
 
 #classmethod date.fromisoformat(date_string)
 #>>> from datetime import date
@@ -41,7 +20,9 @@ def calculate_time_worked(start, num_weeks, timesheet):
     df = pd.read_csv(timesheet, header=0, parse_dates= False, infer_datetime_format = True)
     FMT = '%H:%M'
     for i in range(num_weeks):
-        later = (date.fromisoformat(start) + timedelta(weeks=1)).isoformat()
+        later = (date.fromisoformat(start) + timedelta(days=6)).isoformat()
+        print(start)
+        print(later)
         period = df.query('date >= @start and date <= @later')
         #get hours worked
         daily_hours = period.apply(lambda r : datetime.strptime(r[2], FMT)  - datetime.strptime(r[1], FMT), axis=1)
@@ -58,6 +39,8 @@ def calculate_time_worked(start, num_weeks, timesheet):
         start = (date.fromisoformat(later) + timedelta(days=1)).isoformat()
     return (reg_hours, overtime_hours, pto_hours, sick_hours)
 
+def calculate_PTO_sickdays_ballance(hiredate, end_of_period, employee):
+    pass
 
 def create_json_stub(start, num_weeks, timesheet):
     # Get the hours per week (worked, over, pto, sick)
@@ -66,13 +49,12 @@ def create_json_stub(start, num_weeks, timesheet):
     #Load tax info
     with open('taxes_2021.json') as f:
         taxrates = json.load(f)
-    with open('_private/david.json') as f:
+    with open('_private/steph.json') as f:
         employee = json.load(f)
         
     # Apply pay-rate and over-time rate
     hours_dic = {"worked" : reg_hours, "sick" : sick, "pto": pto, "over": overtime_hours}
     wages = { gross : (reg_hours + pto + sick + overtime_hours*1.5)*employee['rate']}
-    wages[net] = wages[gross]
 
     # Apply federal taxes
     federal_taxes = {
@@ -82,9 +64,14 @@ def create_json_stub(start, num_weeks, timesheet):
         medicare_employee : taxrates[fed][medicare_employer][0]*wages[gross]/100,
         futa : taxrates[fed][futa][0]*wages[gross]/100,
     }
+    wage_applicable_taxes = 0
+    non_wage_taxes = 0
     for tax in federal_taxes:
         if taxrates[fed][tax][2]:
-            wages[net] = wages[net] - federal_taxes[tax]
+            wage_applicable_taxes = wage_applicable_taxes + federal_taxes[tax]
+            print("subtracting", federal_taxes[tax])
+        else:
+            non_wage_taxes = non_wage_taxes + federal_taxes[tax]
             
     # Apply California taxes
     california_taxes = {
@@ -95,16 +82,52 @@ def create_json_stub(start, num_weeks, timesheet):
     
     for tax in california_taxes:
         if taxrates[cal][tax][2]:
-            wages[net] = wages[net] - california_taxes[tax]
+            wage_applicable_taxes = wage_applicable_taxes + california_taxes[tax]
+            print("subtracting", california_taxes[tax])
+        else:
+            non_wage_taxes = non_wage_taxes + california_taxes[tax]
+
+
+    wages[net] = wages[gross] - wage_applicable_taxes
 
     print("Employee: ", employee)
     print("Hours: ", hours_dic)
     print("Wages: ", wages)
     print("Federal taxes: ", federal_taxes)
     print("California taxes: ", california_taxes)
+    print("wages applicable taxes: ", wage_applicable_taxes)
+    print("non wage taxes: ", non_wage_taxes )
+    print("total taxes: ", non_wage_taxes + wage_applicable_taxes)
+    return hours_dic, wages, federal_taxes, california_taxes, wage_applicable_taxes, non_wage_taxes
+
+def print_paystub(info, employee):
+    precision = "{:.2f}"
+    "Paystub\nEmployee: \n\tName: %s\n\tDate of Birth: %s\n\t Social Security Number: %s\n\t"
+
+#print(create_json_stub("2021-05-31", 15, "_private/steph_timesheet_2021.csv"))
+
+print(create_json_stub("2021-09-25", 1, "_private/steph_timesheet_2021.csv"))
 
 
-create_json_stub("2021-04-26",2, "_private/david_timesheet_2021.csv")
+# hours_dic2, wages2, federal_taxes2, california_taxes2, wage_applicable_taxes2, non_wage_taxes2 = create_json_stub("2021-05-10",2, "_private/david_timesheet_2021.csv")
+# hours_dic3, wages3, federal_taxes3, california_taxes3, wage_applicable_taxes3, non_wage_taxes3 = create_json_stub("2021-05-24",2, "_private/david_timesheet_2021.csv")
+
+""" print("unemployment", california_taxes[unemployment] + california_taxes2[unemployment] + california_taxes3[unemployment])
+print("training, ", california_taxes[training] + california_taxes2[training]+ california_taxes3[training])
+print("disab, ", california_taxes[disability] + california_taxes2[disability] + california_taxes3[disability])
+print("ss_er, ", federal_taxes[ss_employer] + federal_taxes2[ss_employer] + federal_taxes3[ss_employer])
+print("medicare_ee, ", federal_taxes[medicare_employee] +  federal_taxes2[medicare_employee] +  federal_taxes3[medicare_employee])
+print("ss_ee, ", federal_taxes[ss_employee] + federal_taxes2[ss_employee] + federal_taxes3[ss_employee])
+print("medicare_er, ", federal_taxes[medicare_employer] +  federal_taxes2[medicare_employer] +  federal_taxes3[medicare_employer])
+print("futa, ", federal_taxes[futa] + federal_taxes2[futa] + federal_taxes3[futa])
+print("wages applicable taxes, ", wage_applicable_taxes + wage_applicable_taxes2  + wage_applicable_taxes3)
+print("non wage taxes", non_wage_taxes + non_wage_taxes2 + non_wage_taxes3)
+print("net: ", wages[net] + wages2[net] + wages3[net])
+print("gross: ", wages[gross] + wages2[gross] + wages3[gross])
+print("hours, ", hours_dic["worked"] + hours_dic2["worked"] + hours_dic3["worked"])
+ """
+
+
         
     
     
