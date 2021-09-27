@@ -3,6 +3,8 @@ from constants import *
 from pymongo import MongoClient, mongo_client, results
 from pymongo.errors import _format_detailed_error
 import json
+from datetime import datetime, date, time, timedelta
+
 
 
 
@@ -48,7 +50,7 @@ class Mongo:
         previous_state = Collection.find_one(self.ID)
         previous_sick = previous_state["sick"]
         print(previous_sick)
-        sick_earned = (previous_state['total_hours']+hours)/hours_per_sick - previous_state['sick']['received']
+        sick_earned = int((previous_state['total_hours']+hours)/hours_per_sick - previous_state['sick']['received'])
         result = Collection.update_one(self.ID, {'$inc' : {'total_hours': hours, 'sick.received' : sick_earned}})
         return (result.modified_count == 1)
     
@@ -68,11 +70,11 @@ class Mongo:
         self.use_sick(sickhours_used)
         advance_balance = self.get_employee()['advance_balance']
         if advance_balance >= net:
-                result = Collection.update_one(self.ID, {'$dec' : {'advance_balance': net}})
+                result_balance = Collection.update_one(self.ID, {'$inc' : {'advance_balance': -net}})
                 net = 0
         elif advance_balance > 0:
                 net = net - advance_balance
-                result = Collection.update_one(self.ID, {'$set' : {'advance_balance': 0}})
+                result_balance = Collection.update_one(self.ID, {'$set' : {'advance_balance': 0}})
         current_state = Collection.find_one(self.ID)
         paystub = {
             "payperiod_start" : start,
@@ -85,13 +87,25 @@ class Mongo:
                 "pto" : current_state["PTO"]["received"] - current_state["PTO"]["used"],
                 "sick_days" :  current_state["sick"]["received"] - current_state["sick"]["used"],
                 "advance": current_state["advance_balance"],
-                "gross_salary": net
                 },
-            "net_salary": gross
+            "gross_salary": gross,
+            "net_salary": net
         }
         # Creates a paystub for the givent perioud
-        result = Collection.update_one(self.ID, {'$push': {'paystubs' : paystub}})
-        return (result.modified_count == 1)
+        result_stub = Collection.update_one(self.ID, {'$push': {'paystubs' : paystub}, '$inc': {'gross_sa_far' : gross, 'net_so_far' : net} })
+        current_state = Collection.find_one(self.ID)
+
+        # update end of quarter totals
+        end_date = date.fromisoformat(end)
+        if end_date <= end_q1:
+            result_quarter = Collection.update_one(self.ID, {'$inc': { 'quarters.0.hours' : hours_worked, 'quarters.0.gross': gross, 'quarters.0.net': net }})
+        elif end_date <= end_q2:
+            result_quarter = Collection.update_one(self.ID, {'$inc': { 'quarters[1].hours' : hours_worked, 'quarters[1].gross': gross, 'quarters[1].net': net }})
+        elif end_date <= end_q3:
+            result_quarter = Collection.update_one(self.ID, {'$inc': { 'quarters.2.hours' : hours_worked, 'quarters.2.gross': gross, 'quarters.2.net': net }})
+        else:
+            result_quarter = Collection.update_one(self.ID, {'$inc': { 'quarters[3].hours' : hours_worked, 'quarters[3].gross': gross, 'quarters[3].net': net }})
+        return (result_stub.modified_count == 1 and result_quarter.modified_count == 1 and result_balance.modified_count == 1)
 
 
 print("employee removed: ", delete_employee("_private/steph.json"))
@@ -103,6 +117,9 @@ print("adding 6 PTO: ", employee.add_pto(6))
 print("new state: ", employee.get_employee())
 print("adding 62 hours: ", employee.add_hours(62))
 print("new state: ", employee.get_employee())
-print("using 1 sick hour: ", employee.use_sick(1))
+print("using 1 sick hour: ", employee.use_sick(3))
+print("new state: ", employee.get_employee())
+print(" ----- Generating pay stub and updating records ----=")
+print("success: ", employee.create_paystub(25, 3, 0, 256, 222, "2021-09-06", "2021-09-12", 3333))
 print("new state: ", employee.get_employee())
 

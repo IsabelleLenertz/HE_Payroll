@@ -29,28 +29,26 @@ Collection.insert_one(file_data) """
 
 
 # get the hours worked for a week from start date (str: MM-DD-YYY)
-def calculate_time_worked(start, num_weeks, timesheet):
+def calculate_time_worked(start, end, timesheet):
     reg_hours, overtime_hours, pto_hours, sick_hours = 0, 0, 0, 0
     df = pd.read_csv(timesheet, header=0, parse_dates= False, infer_datetime_format = True)
     FMT = '%H:%M'
-    for i in range(num_weeks):
-        later = (date.fromisoformat(start) + timedelta(days=6)).isoformat()
-        print(start)
-        print(later)
-        period = df.query('date >= @start and date <= @later')
-        #get hours worked
-        daily_hours = period.apply(lambda r : datetime.strptime(r[2], FMT)  - datetime.strptime(r[1], FMT), axis=1)
-        daily_other = period.sum(numeric_only = True)
-        pto_hours = pto_hours + daily_other[1]
-        sick_hours = sick_hours + daily_other[0]
-        worked = daily_hours.aggregate(np.sum, 0)
-        worked = worked.total_seconds()/3600
-        if worked > 40:
-            reg_hours = reg_hours + 40
-            overtime_hours = overtime_hours + worked - 40
-        else:
-            reg_hours = reg_hours + worked
-        start = (date.fromisoformat(later) + timedelta(days=1)).isoformat()
+    start = date.fromisoformat(start)
+    end = date.fromisoformat(end)
+    period = df.query('date >= @start and date <= @end')
+    #get hours worked
+    daily_hours = period.apply(lambda r : datetime.strptime(r[2], FMT)  - datetime.strptime(r[1], FMT), axis=1)
+    daily_other = period.sum(numeric_only = True)
+    pto_hours = pto_hours + daily_other[1]
+    sick_hours = sick_hours + daily_other[0]
+    worked = daily_hours.aggregate(np.sum, 0)
+    worked = worked.total_seconds()/3600
+    if worked > 40:
+        reg_hours = reg_hours + 40
+        overtime_hours = overtime_hours + worked - 40
+    else:
+        reg_hours = reg_hours + worked
+    start = (date.fromisoformat(later) + timedelta(days=1)).isoformat()
     return (reg_hours, overtime_hours, pto_hours, sick_hours)
 
 def calculate_PTO_sickdays_ballance(hiredate, end_of_period, employee):

@@ -1,3 +1,4 @@
+from datetime import date
 fed = "federal_taxes"
 ss_employer = "social_security_employer"
 medicare_employer = "medicare_employer"
@@ -24,3 +25,8 @@ fn = "name_first"
 ln = "name_last"
 hours_per_sick = 30
 year = "year"
+end_q1 = date.fromisoformat("2021-03-31")
+end_q2 = date.fromisoformat("2021-07-31")
+end_q3 = date.fromisoformat("2021-09-30")
+end_q4 = date.fromisoformat("2021-12-31")
+
