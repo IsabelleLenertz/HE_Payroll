@@ -1,0 +1,177 @@
+<html>
+
+<head>
+    <title>Paystub {{ start_date }} - {{ end_date }}</title>
+    <head>
+        <link rel="stylesheet" href="paystubb.css">
+      </head>
+</head>
+
+<body>
+    <table>
+        <tr>
+            <th>Employer</th>
+            <th>Employee</th>
+        </tr>
+        <tr>
+            <td>{{ Employer_string }}</td>
+            <td>{{ Employee_string }}</td>
+        </tr>
+    </table>
+    <p>
+        HOURS WORKED <br>
+        Regular rate: {{ rate_regular }} <br>
+        Regular hours: {{ hours_regular }} <br>
+        Overtime hours: {{ hours_overtime }} <br>
+        Sick time hours: {{ hours_sick }} <br>
+        PTO hours: {{ hours_pto }} <br>
+        <br>
+    </p>
+
+    <p>
+        TOTAL GROSS PAY <br>
+        This Period: {{ this_period_gross }} <br>
+        Year to date: {{ ytd_gross }} <br>
+    </p>
+
+    <p>
+        CALIFORNIA TAXES <br>
+    <table>
+        <tr>
+            <th>Tax</th>
+            <th>This Period</th>
+            <th>Year to Date</th>
+        </tr>
+        <tr>
+            <td>Unemployment Insurance</td>
+            <td>{{ unemployment_this}} </td>
+            <td>{{ unemployment_ytd}} </td>
+        </tr>
+        <tr>
+            <td>Employment training</td>
+            <td>{{ training_this}} </td>
+            <td>{{ training_ytd}} </td>
+        </tr>
+        <tr>
+            <td>Disability Insurance</td>
+            <td>{{ disability_this}} </td>
+            <td>{{ disability_ytd}} </td>
+        </tr>
+    </table>
+    </p>
+    <p>
+        STATE TAXES <br>
+    <table>
+        <tr>
+            <th>Tax</th>
+            <th>This Period</th>
+            <th>Year to Date</th>
+        </tr>
+        <tr>
+            <td>Social security (employer)</td>
+            <td>{{ ss_employer_this}} </td>
+            <td>{{ ss_employer_ytd}} </td>
+        </tr>
+        <tr>
+            <td>Medicare (employer)</td>
+            <td>{{ medicare_employer_this}} </td>
+            <td>{{ medicare_employer_ytd}} </td>
+        </tr>
+        <tr>
+            <td>Social security (employee)</td>
+            <td>{{ ss_employee_this}} </td>
+            <td>{{ ss_employee_ytd}} </td>
+        </tr>
+        <tr>
+            <td>Medicare (employee)</td>
+            <td>{{ medicare_employee_this}} </td>
+            <td>{{ medicare_employee_ytd}} </td>
+        </tr>
+        <tr>
+            <td>Federal unemployment (FUTA)</td>
+            <td>{{ futa_this}} </td>
+            <td>{{ futa_ytd}} </td>
+        </tr>
+    </table>
+    </p>
+
+    <p>
+        TOTAL WAGE-APPLICABLE TAXES <i>*</i>: <br>
+        <table>
+            <tr>
+                <td>This Period:</td>
+                <td>{{ wage_applicable_this }}</td>    
+            </tr>
+            <tr>
+                <td>Year to date:</td>
+                <td> {{ wage_applicable_ytd }}</td>    
+            </tr>
+        </table>
+    </p>
+
+    <p>
+        TOTAL NON-WAGE-APPLICABLE TAXES:<br>
+        <table>
+            <tr>
+                <td>This Period:</td>
+                <td>{{ wage_none_this }}</td>    
+            </tr>
+            <tr>
+                <td>Year to date:</td>
+                <td> {{ wage_none_ytd }}</td>    
+            </tr>
+        </table>
+    </p>
+
+    <p>
+        TOTAL TAXES:<br>
+        <table>
+            <tr>
+                <td>This Period:</td>
+                <td>{{ taxes_this }}</td>    
+            </tr>
+            <tr>
+                <td>Year to date:</td>
+                <td> {{ taxes_ytd }}</td>    
+            </tr>
+        </table>
+    </p>
+
+    <p>
+        <b>GROSS PAY</b> <br>
+        <table>
+            <tr>
+                <td>This Period:</td>
+                <td>{{ this_period_gross }}</td>    
+            </tr>
+            <tr>
+                <td>Year to date:</td>
+                <td>{{ ytd_gross }}</td>    
+            </tr>
+        </table>
+    </p>
+
+    <p>
+        <b>NET PAY <i>**</i></b> <br>
+        <table>
+            <tr>
+                <td>This Period:</td>
+                <td>{{ this_period_net }}</td>    
+            </tr>
+            <tr>
+                <td>Year to date:</td>
+                <td>{{ ytd_net }}</td>    
+            </tr>
+        </table>    </p>
+
+    <p>
+        <i>* net pay = hours*rate-wage applicable taxes> <br>
+        ** wage applicable taxes are: medicare and social security (employee’s portion) and state disability insurance </i>
+    </p>
+
+    <p>
+        CHECK NUMBER: {{ check_num }}
+    </p>
+</body>
+
+</html>

@@ -1,5 +1,6 @@
 import datetime
 import csv
+from mongo_client import delete_employee
 import pandas as pd
 import numpy as np
 from datetime import datetime, date, time, timedelta
@@ -7,14 +8,13 @@ import json
 from constants import *
 from pymongo import MongoClient, mongo_client
 from pymongo.errors import _format_detailed_error
+import mongo_client
 
 # get the hours worked for a week from start date to end date (str: MM-DD-YYY)
 def calculate_time_worked(start, end, timesheet):
     reg_hours, overtime_hours, pto_hours, sick_hours = 0, 0, 0, 0
     df = pd.read_csv(timesheet, header=0, parse_dates= False, infer_datetime_format = True)
     FMT = '%H:%M'
-    start = date.fromisoformat(start)
-    end = date.fromisoformat(end)
     period = df.query('date >= @start and date <= @end')
     #get hours worked
     daily_hours = period.apply(lambda r : datetime.strptime(r[2], FMT)  - datetime.strptime(r[1], FMT), axis=1)
@@ -28,7 +28,7 @@ def calculate_time_worked(start, end, timesheet):
         reg_hours = 40
     return (reg_hours, overtime_hours, pto_hours, sick_hours)
 
-def update_db(start, end, timesheet, employee_file):
+def update_db(start, end, timesheet, employee_file, check_num):
     # Get the hours per week (worked, over, pto, sick)
     reg_hours, overtime_hours, pto, sick = calculate_time_worked(start, end , timesheet)
 
@@ -37,6 +37,8 @@ def update_db(start, end, timesheet, employee_file):
         taxrates = json.load(f)
     with open(employee_file) as f:
         employee = json.load(f)
+    
+    employee_connection = mongo_client.Mongo("Stephanie", "Langerveld", 2021)
         
     # Apply pay-rate and over-time rate
     hours_dic = { worked : reg_hours, sick_used : sick, pto_used: pto, over_worked : overtime_hours}
@@ -72,21 +74,6 @@ def update_db(start, end, timesheet, employee_file):
 
 
     wages[net] = wages[gross] - wages[w_taxes]
-
-    print("Employee: ", employee)
-    print("Hours: ", hours_dic)
-    print("Wages: ", wages)
-    print("Federal taxes: ", federal_taxes)
-    print("California taxes: ", california_taxes)
-    print("wages applicable taxes: ", wages[w_taxes])
-    print("non wage taxes: ", wages[w_notaxes] )
-    print("total taxes: ", wages[w_notaxes] + wages[w_taxes])
-    return hours_dic, wages, federal_taxes, california_taxes, wages[w_taxes], wages[w_notaxes]
-
-print(update_db("2021-09-25", "2021-09-25", "_private/steph_timesheet_2021.csv", '_private/steph.json'))
-
-
-        
     
-    
-    
+    return employee_connection.create_paystub(hours_dic[worked], hours_dic[pto_used], hours_dic[sick_used], wages, start, end, check_num, california_taxes, federal_taxes)
+
