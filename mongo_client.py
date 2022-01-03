@@ -41,11 +41,14 @@ def browseLocal(webpageText, filename):
 
 class Mongo:
     def __init__(self,first_name, last_name, current_year):
+        print(first_name,", ",last_name, ", ", current_year)
         self.employee_identifiers = {
             ln: last_name,
             fn : first_name,
             year: current_year
         }
+        print(self.employee_identifiers)
+        print("SEARCH: ", Collection.find_one(self.employee_identifiers))
         self.ID = { mongo_id : Collection.find_one(self.employee_identifiers)[mongo_id]}
 
     def get_employee(self):
@@ -58,10 +61,12 @@ class Mongo:
 
     def add_hours(self, hours):
         previous_state = Collection.find_one(self.ID)
-        previous_sick = previous_state[sick]
-        sick_flsat = (previous_state[ytd_hours]+hours)/hours_per_sick - previous_state[sick][received]
-        sick_earned = int(sick_flsat)
-        result = Collection.update_one(self.ID, {'$inc' : { ytd_hours: hours, sick+"."+received : int(sick_earned)}})
+        sick_fearned = (previous_state[ytd_hours]+hours)/hours_per_sick - previous_state[sick][received]
+        sick_earned = int(sick_fearned)
+        pto_fearned = (previous_state[ytd_hours]+hours)/hours_per_pto - previous_state[pto][received]
+        pto_earned = int(pto_fearned)
+        print("PTO_EARNED: ", pto_earned)
+        result = Collection.update_one(self.ID, {'$inc' : { ytd_hours: hours, sick+"."+received : int(sick_earned), pto+"."+received : int(pto_earned)}})
         return (result.modified_count == 1)
     
     def use_PTO(self, hours):
@@ -128,11 +133,11 @@ class Mongo:
         self.use_sick(sickhours_used)
         advance_balance = self.get_employee()[advance_b]
         if advance_balance >= wages_earned[net]:
-                #result_balance = Collection.update_one(self.ID, {'$inc' : {advance_b: - float(wages_earned[net])}})
+                result_balance = Collection.update_one(self.ID, {'$inc' : {advance_b: - float(wages_earned[net])}})
                 wages_earned[net] = 0
         elif advance_balance > 0:
                 wages_earned[net] = wages_earned[net] - advance_balance
-                #result_balance = Collection.update_one(self.ID, {'$set' : {advance_b: 0}})
+                result_balance = Collection.update_one(self.ID, {'$set' : {advance_b: 0}})
         current_state = Collection.find_one(self.ID)
 
         # Creates a paystub for the givent perioud
@@ -152,7 +157,7 @@ class Mongo:
             fed : federal_taxes,
             cal : califoria_taxes
         }
-
+        print(paystub)
         result_stub = Collection.update_one(self.ID, {'$addToSet': { paystubs  : paystub},'$inc': { ytd_wages +"."+ytd_gross : float(wages_earned[gross]), ytd_wages +"."+ytd_net : float(wages_earned[net])} })
 
 
@@ -171,9 +176,8 @@ class Mongo:
     
 
 
-employee_connection = Mongo("Stephanie", "Langerveld", 2021)
 #print(employee_connection.get_employee())
-employee_connection.print_paystb("2021-10-01")
+#employee_connection.print_paystb("2021-10-01")
 
 '''
 Employer_string = "Isabelle and Sebastien Delmas"

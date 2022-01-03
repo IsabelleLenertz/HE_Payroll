@@ -1,0 +1,60 @@
+{
+    "name_first": "test",
+    "name_last": "employee",
+    "rate": 27.50,
+    "ytd_hours": 0,
+    "year" : 2022,
+    "ytd_wages" : {
+        "ytd_gross" : 0.0,
+        "ytd_net" : 0.0,
+        "ytd_wage_applicable_taxes" : 0.0,
+        "ytd_wage_none_applicable_taxes" : 0.0
+    },
+    "ytd_california_taxes" : {
+        "ytd_unemployment" : 0.0,
+        "ytd_training" : 0.0,
+        "ytd_disability" : 0.0
+    },
+    "ytd_federal_taxes" : {
+        "ytd_ss_employer" : 0.0,
+        "ytd_medicare_employer": 0.0,
+        "ytd_ss_employee" : 0.0,
+        "ytd_medicare_employee" : 0.0
+    },
+    "pto_hours": {
+        "received" : 0,
+        "used": 0
+    },
+    "sick_hours": {
+        "received" : 0,
+        "used": 0
+    },
+    "advance_balance": 0,
+    "advances":[
+    ],
+    "quarters":[
+        {
+            "hours": 0,
+            "gross": 0,
+            "net" : 0
+        },
+        {
+            "hours": 0,
+            "gross": 0,
+            "net" : 0
+        },
+        {
+            "hours": 0,
+            "gross": 0,
+            "net" : 0
+        },
+        {
+            "hours": 0,
+            "gross": 0,
+            "net" : 0
+        }
+
+    ],
+    "paystubs" : [ 
+    ]
+}

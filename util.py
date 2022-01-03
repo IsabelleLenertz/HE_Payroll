@@ -38,7 +38,7 @@ def update_db(start, end, timesheet, employee_file, check_num):
     with open(employee_file) as f:
         employee = json.load(f)
     
-    employee_connection = mongo_client.Mongo("Stephanie", "Langerveld", 2021)
+    employee_connection = mongo_client.Mongo(employee[fn], employee[ln], 2022)
         
     # Apply pay-rate and over-time rate
     hours_dic = { worked : reg_hours, sick_used : sick, pto_used: pto, over_worked : overtime_hours}

@@ -50,12 +50,13 @@ mongo_id = "_id"
 fn = "name_first"
 ln = "name_last"
 hours_per_sick = 30
+hours_per_pto = 20
 year = "year"
 pp_start = "payperiod_start"
 pp_end = "payperiod_end"
 mongo_adress = "mongodb://127.0.0.1:27017"
-end_q1 = date.fromisoformat("2021-03-31")
-end_q2 = date.fromisoformat("2021-07-31")
-end_q3 = date.fromisoformat("2021-09-30")
-end_q4 = date.fromisoformat("2021-12-31")
+end_q1 = date.fromisoformat("2022-03-31")
+end_q2 = date.fromisoformat("2022-07-31")
+end_q3 = date.fromisoformat("2022-09-30")
+end_q4 = date.fromisoformat("2022-12-31")
 
